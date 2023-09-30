@@ -2,88 +2,97 @@
 #include <vector>
 using namespace std;
 
-void vvod(int n, vector<vector<int>>& Game){//ввод значений в игровое поле 
-    int p =1;
+void input(int n, vector<vector<int>>& Game_board){//ввод значений в игровое поле 
+    int switch_string =1;
 
     for (int i = 0; i < n;++i){
-        if ( p<=n){
-            for(int j =0;j<p;j++){
-                Game[i][j]=1;
+        if ( switch_string<=n){
+            for(int j =0;j<switch_string;j++){
+                Game_board[i][j]=1;
         
             }
-            p++;
+            switch_string++;
         }
 
     }
 }
 
-void vivod(vector <vector<int>>& Game){//вывод игрового поля
-    for(int i =0;i<Game.size();i++){
-        for(int j =0;j<Game[i].size();j++){
-            cout<< Game[i][j]<<"  ";  
+void output(const vector <vector<int>>& Game_board){//вывод игрового поля
+    for(int i =0;i<Game_board.size();i++){
+        for(int j =0;j<Game_board[i].size();j++){
+            cout<< Game_board[i][j]<<"  ";  
         }
         cout<< endl;   
     }
 }
 
-void summ(int sum, vector <int>& Sum,vector <vector<int>>& Game){//сумма чтобы пользоваться тактикой
-    for (int i =0;i< Game.size(); i++){
-        for (int j =0;j<Game[i].size();j++){
-            sum+= Game[i][j];    
+void summarize_vector(vector <int>& Sum,const vector <vector<int>>& Game_board){//сумма чтобы пользоваться тактикой
+    int stringsum=0;
+    for (int i =0;i< Game_board.size(); i++){
+        for (int j =0;j<Game_board[i].size();j++){
+            stringsum+= Game_board[i][j];    
         }
-        Sum[i]=sum;   
-        sum=0;
+        Sum[i]=stringsum;   
+        stringsum=0;
     }
 }
 
-bool proverka_win(vector <int>& Sum){
-    int sum=0;
+bool check_win(const vector <int>& Sum){
+    int stringsum=0;
     for(int i =0;i<Sum.size();++i){
-        sum+=Sum[i];
+        stringsum+=Sum[i];
     }
-    if(sum>0) return false;
+    if(stringsum>0){
+        return false;
+    }
     
     return true;
 
 }
 
-void hod_robota(int sum, vector <int>& Sum,vector <vector<int>>& Game){
-    int ili,p,r=0;
-    for( int i =0;i< Game.size();i++){
+void robots_move(vector <int>& Sum,vector <vector<int>>& Game_board){
+    int iterable_for_xor,save_j_iterable,save_i_iterable=0;
+    
+    for( int i =0;i< Game_board.size();i++){
         for( int j =1;j< Sum[i]+1;j++){
-            ili=Sum[i]-j;
-            for( int k =0;k< Game.size();k++){
+            iterable_for_xor=Sum[i]-j;
+            for( int k =0;k< Game_board.size();k++){
                 if(k!=i){
-                    ili= ili^Sum[k];  
+                    iterable_for_xor= iterable_for_xor^Sum[k];  
                 }
             }
-            p=j;
-            r=i;
+            save_j_iterable=j;
+            save_i_iterable=i;
             
-            if (ili==0){
+            if (iterable_for_xor==0){
+                
                 Sum[i]-=j;
-                int h=Game[i].size()-1;
+                
+                int delete_from_the_end=Game_board[i].size()-1;
                 while(j>0){
-                    if(Game[i][h]!=0){
-                        Game[i][h]=0;
+                    if(Game_board[i][delete_from_the_end]!=0){
+                        Game_board[i][delete_from_the_end]=0;
                         j--;
                     }
-                    h--;
+                    delete_from_the_end--;
                 }
+                
                 break;
             }               
         }
-        if (ili==0) break;
+        if (iterable_for_xor==0) break;
     }      
-    if (ili != 0){// не нашел оптимальный ход, делаем последнее возможное
-        Sum[r]-=p;
-        for(int h =p-1;h>0;h--){
-            Game[r][h]=0;
+    if (iterable_for_xor != 0){// не нашел оптимальный ход, делаем последнее возможное
+        
+        Sum[save_i_iterable]-=save_j_iterable;
+        
+        for(int h =save_j_iterable-1;h>=0;h--){
+            Game_board[save_i_iterable][h]=0;
         }               
     }
 }
 
-void hod_ugroka(vector <int>& Sum,vector <vector<int>>& Game){
+void players_move(vector <int>& Sum,vector <vector<int>>& Game_board){
     int stroka,kolvo=0;
 
     cout<<"Введите строку и количество фишек, которые вы хотите убрать (Номера строк начинаются с 1)"<<endl;
@@ -91,10 +100,10 @@ void hod_ugroka(vector <int>& Sum,vector <vector<int>>& Game){
 
     Sum[stroka-1]-=kolvo;
 
-    int h=Game[stroka-1].size()-1;
+    int h=Game_board[stroka-1].size()-1;
     while(kolvo>0){
-        if(Game[stroka-1][h]!=0){
-        Game[stroka-1][h]=0;
+        if(Game_board[stroka-1][h]!=0){
+        Game_board[stroka-1][h]=0;
         kolvo--;              
         }
     h--;
@@ -103,8 +112,7 @@ void hod_ugroka(vector <int>& Sum,vector <vector<int>>& Game){
 
 int main(){
     int n=0;//размеры игры
-    int sum=0; //сумма строки
-    int swich=0; // выбор сложности
+    int hardness=0; // выбор сложности
     bool win=false; // ура победа
 
     cout<<" Выберите размер "<< endl;
@@ -112,51 +120,51 @@ int main(){
     cin >> n;
 
     
-    vector <vector <int>> Vec(n, vector <int> (n));
+    vector <vector <int>> Game_board(n, vector <int> (n));
     vector <int> Sum(n,0);
-
+    
     cout<<" Выберите сложность "<< endl;
     cout<<" (Сложность зависит от того, кто ходит первым: Вы или робот) "<< endl;
     cout<<" Введите цифру 1, чтобы ходить первым или введите цифру 2, чтобы ходить вторым "<< endl;
 
-    cin>>swich;
+    cin>>hardness;
 
-    vvod(n,Vec); // Создали массив
-    vivod(Vec); // вывели его
-    summ(sum,Sum,Vec); // изначальная сумма, которая потом меняется
-
-    if (swich==1){
+    input(n,Game_board); // Создали массив
+    output(Game_board); // вывели его
+    summarize_vector(Sum,Game_board); // изначальная сумма, которая потом меняется
+    
+    if (hardness==1){
         while (win==0)
         {
-            hod_ugroka(Sum,Vec);
+            players_move(Sum,Game_board);
             cout<<endl;
-            win=proverka_win(Sum);
+            win=check_win(Sum);
             if (win==1){
                 cout<< "Джон Коннор, вы победили машин, восставших из пепла ядерного огня"<<endl;
                 break;
             }
             cout<<endl;
-            hod_robota(sum,Sum,Vec);
-            vivod(Vec);
-            win=proverka_win(Sum);
+            robots_move(Sum,Game_board);
+            output(Game_board);
+            win=check_win(Sum);
             if (win==1){
                 cout<< "Вы проиграли машине, как грустно"<<endl;
                 break;
             }
         }
     }
-    else if (swich==2){//робот первый
+    else if (hardness==2){//робот первый
         while (win==0){  
             cout<<endl;
-            hod_robota(sum,Sum,Vec);
-            vivod(Vec);
-            win=proverka_win(Sum);
+            robots_move(Sum,Game_board);
+            output(Game_board);
+            win=check_win(Sum);
             if (win==1){
                 cout<< "Вы проиграли машине, как грустно"<<endl;
                 break;
             }
-            hod_ugroka(Sum,Vec);
-            win=proverka_win(Sum);
+            players_move(Sum,Game_board);
+            win=check_win(Sum);
             if (win==1){
                 cout<< "Джон Коннор, вы победили машин, восставших из пепла ядерного огня"<<endl;
                 break;
