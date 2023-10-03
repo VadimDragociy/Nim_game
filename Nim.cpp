@@ -51,7 +51,9 @@ bool check_win(const vector <int>& Sum){
 }
 
 void robots_move(vector <int>& Sum,vector <vector<int>>& Game_board){
-    int iterable_for_xor,save_j_iterable,save_i_iterable=0;
+    int iterable_for_xor=1;
+    int save_j_iterable=0;
+    int save_i_iterable=0;
     
     for( int i =0;i< Game_board.size();i++){
         for( int j =1;j< Sum[i]+1;j++){
